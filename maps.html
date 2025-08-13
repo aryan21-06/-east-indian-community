@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Nearest East Indian Community</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- Leaflet Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        header {
+            background: #800000;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+        .controls {
+            padding: 10px;
+            background: white;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        button {
+            padding: 10px 15px;
+            background: #800000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #a00000;
+        }
+        .community-card {
+            max-width: 300px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .community-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background: #ddd;
+        }
+        .community-card .content {
+            padding: 10px;
+        }
+        .community-card h3 {
+            margin-top: 0;
+            color: #800000;
+        }
+        .community-card ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Find Your Nearest East Indian Catholic Community
+</header>
+
+<div class="controls">
+    <p>💡 Tip: Use the search bar (top-right) to enter your area — or click below to use your location.</p>
+    <button onclick="locateUser()">📍 Use My Location</button>
+</div>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- Leaflet Geocoder JS -->
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+    // Community data
+    var communities = [
+        {
+            name: "Orlem (Malad) East Indian Community",
+            lat: 19.186, lon: 72.841,
+            facts: [
+                "Known for its homemade 'fugias' (airy fried bread) and secret 'bottle masala' spice blend.",
+                "Home to the Lourdes Church (1916); feast day is famous for folk dances and stalls.",
+                "Old Portuguese-style cottages still stand here."
+            ],
+            image: "orlem.webp"
+        },
+        {
+            name: "Matharpacady (Mazagaon) East Indian Community",
+            lat: 18.963, lon: 72.844,
+            facts: [
+                "Heritage enclave with Indo-Portuguese houses from the 19th century.",
+                "Famous 'Lion’s Den' house with stone lions at the gate.",
+                "Feels like an old-world village in the middle of Mumbai."
+            ],
+            image: "mazgaon.jpg"
+        },
+        {
+            name: "Ranwar (Bandra) East Indian Community",
+            lat: 19.056, lon: 72.832,
+            facts: [
+                "A 300-year-old hamlet dating to 1716.",
+                "Residents pray the rosary together in Ranwar Square each May.",
+                "Revived old chit-fund traditions to support community projects."
+            ],
+            image: "bandra.avif"
+        },
+        {
+            name: "Khotachiwadi (Girgaon) East Indian Community",
+            lat: 18.957, lon: 72.819,
+            facts: [
+                "Indo-Portuguese wooden homes with red-tiled roofs and verandahs.",
+                "Hosts heritage festivals to revive old songs and dances.",
+                "Founded by Waman Hari Khot."
+            ],
+            image: "girgaon.webp"
+        },
+        {
+            name: "Cavel (South Mumbai) East Indian Community",
+            lat: 18.950, lon: 72.832,
+            facts: [
+                "Originally a Koli fishing hamlet, became Catholic under Portuguese rule.",
+                "Home to Our Lady of Health Church, built in 1794.",
+                "Now a mix of cultures but retains some East Indian families."
+            ],
+            image: "cavel.jpg"
+        },
+        {
+            name: "Kurla (Christian Village) East Indian Community",
+            lat: 19.072, lon: 72.879,
+            facts: [
+                "Name comes from 'kurli' (crab).",
+                "Holy Cross Church built in 1580.",
+                "Famous for the Phool Dongri cross feast in May."
+            ],
+            image: "kurla.jpg"
+        },
+        {
+            name: "Marol (Andheri) East Indian Community",
+            lat: 19.107, lon: 72.882,
+            facts: [
+                "Pastel cottages with angel statues on pillars.",
+                "May evenings feature rosary prayers at roadside crosses.",
+                "Ends the month with a friendly game of housie on the street."
+            ],
+            image: "marol.jpg"
+        },
+        {
+            name: "Manori (Borivali) East Indian Community",
+            lat: 19.208, lon: 72.793,
+            facts: [
+                "Home to Kaka Baptista Museum of East Indian heritage.",
+                "Hosts annual East Indians Day with folk music and dance.",
+                "Specialties include pambaz curry and toddy."
+            ],
+            image: "manori.jpg"
+        },
+        {
+            name: "Vakola (Santacruz East) East Indian Community",
+            lat: 19.085, lon: 72.851,
+            facts: [
+                "Once called Vancola, now one of the largest East Indian neighborhoods.",
+                "Many homes have old white-tiled roofs and verandahs.",
+                "Retains a rural feel with coconut trees and street crosses."
+            ],
+            image: "vakola.jpg"
+        },
+        {
+            name: "Kalina (Santacruz East) East Indian Community",
+            lat: 19.080, lon: 72.853,
+            facts: [
+                "Known as Kole-Kalyan ('home of jackals').",
+                "Church of Our Lady of Egypt opened in 1606.",
+                "One of Mumbai’s earliest Christian villages."
+            ],
+            image: "kalina.jpg"
+        },
+        {
+            name: "Malwani (Malad East) East Indian Community",
+            lat: 19.204, lon: 72.823,
+            facts: [
+                "Known for coconut and betel nut farms.",
+                "Celebrates Agera (harvest festival) in October.",
+                "Serves sweet checchi and fish curries during feasts."
+            ],
+            image: "malwani.jpg"
+        },
+        {
+            name: "Vasai (Bassein) East Indian Community",
+            lat: 19.364, lon: 72.828,
+            facts: [
+                "Catholic traditions thrive in Vasai Fort area.",
+                "Marks Agera with harvest blessings in October.",
+                "Feast of Our Lady of the Pillar is a highlight."
+            ],
+            image: "vasai.jpg"
+        }
+    ];
+
+    // Initialize map
+    var map = L.map('map').setView([19.0760, 72.8777], 11);
+
+    // Add tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Add markers — clicking shows the card
+    communities.forEach(function(c) {
+        var marker = L.marker([c.lat, c.lon]).addTo(map);
+        marker.on('click', function() {
+            showCommunityCard(c);
+        });
+    });
+
+    // Locate user
+    function locateUser() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var userLat = position.coords.latitude;
+                var userLon = position.coords.longitude;
+                showUserMarker(userLat, userLon);
+                var nearest = findNearestCommunity(userLat, userLon);
+                showCommunityCard(nearest);
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // Search bar
+    L.Control.geocoder({ defaultMarkGeocode: false })
+    .on('markgeocode', function(e) {
+        var latlng = e.geocode.center;
+        showUserMarker(latlng.lat, latlng.lng);
+        var nearest = findNearestCommunity(latlng.lat, latlng.lng);
+        showCommunityCard(nearest);
+    })
+    .addTo(map);
+
+    function showUserMarker(lat, lon) {
+        map.setView([lat, lon], 13);
+        L.marker([lat, lon], {
+            icon: L.icon({
+                iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                iconSize: [32, 32]
+            })
+        }).addTo(map).bindPopup("<b>Your Location</b>").openPopup();
+    }
+
+    function findNearestCommunity(lat, lon) {
+        var minDist = Infinity;
+        var nearest = null;
+        communities.forEach(function(c) {
+            var dist = getDistance(lat, lon, c.lat, c.lon);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = c;
+            }
+        });
+        return nearest;
+    }
+
+    function showCommunityCard(community) {
+        var cardHtml = `
+            <div class="community-card">
+                <img src="${community.image}" alt="${community.name}">
+                <div class="content">
+                    <h3>${community.name}</h3>
+                    <ul>
+                        ${community.facts.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+        L.popup()
+            .setLatLng([community.lat, community.lon])
+            .setContent(cardHtml)
+            .openOn(map);
+    }
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+        function toRad(x) { return x * Math.PI / 180; }
+        var R = 6371;
+        var dLat = toRad(lat2 - lat1);
+        var dLon = toRad(lon2 - lon1);
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+</script>
+
+</body>
+</html>
